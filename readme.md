@@ -1,0 +1,1 @@
+# this app mainly focuses on backend functionalities
