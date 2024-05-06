@@ -10,7 +10,7 @@ const generateAccessAndRefreshToken = async (uesrId) => {
   try {
     const user = await User.findById(uesrId);
     const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
@@ -137,8 +137,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -200,6 +200,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
+    console.error("Error verifying token:", error);
     throw new ApiError(401, error?.message || "invalid access token");
   }
 });
@@ -288,7 +289,7 @@ const updateUserCoverimage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        avatar: coverImage.url,
+        coverImage: coverImage.url,
       },
     },
     { new: true }
@@ -371,6 +372,8 @@ const getWatchHistory = asyncHandler(async (req, res) => {
       $match: {
         _id: new mongoose.Types.ObjectId(req.user?._id),
       },
+    },
+    {
       $lookup: {
         from: "videos",
         localField: "watchHistory",
