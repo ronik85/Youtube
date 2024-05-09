@@ -71,7 +71,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Tweet not found");
   }
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, updatedTweet, "Tweet updated successfully"));
 });
